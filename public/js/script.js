@@ -13,7 +13,7 @@ const map = new maplibregl.Map({
                     "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
                 ],
                 tileSize: 256,
-                attribution: "© OpenStreetMap contributors",
+                attribution: "Bansi Tracker",
             },
         },
         layers: [
