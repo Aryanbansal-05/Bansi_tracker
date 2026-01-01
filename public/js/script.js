@@ -13,55 +13,47 @@ const map = new maplibregl.Map({
                     "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
                 ],
                 tileSize: 256,
-                attribution: "Bansi Tracker",
+                attribution: "© OpenStreetMap contributors",
             },
         },
-        layers: [
-            {
-                id: "osm",
-                type: "raster",
-                source: "osm",
-            },
-        ],
+        layers: [{ id: "osm", type: "raster", source: "osm" }],
     },
-    center: [0, 0],
-    zoom: 2,
+    center: [0, 0], 
+    zoom: 2,       
 });
 
 map.addControl(new maplibregl.NavigationControl());
 
 const markers = {};
 
+let lastSent = 0;
+
 if (navigator.geolocation) {
     navigator.geolocation.watchPosition(
         (position) => {
+            const now = Date.now();
+            if (now - lastSent < 2000) return; 
+            lastSent = now;
+
             const { latitude, longitude } = position.coords;
             socket.emit("send-location", { latitude, longitude });
         },
-        (error) => console.error(error),
-        {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0,
-        }
+        console.error,
+        { enableHighAccuracy: true }
     );
 }
 
 socket.on("receive-location", (data) => {
     const { id, latitude, longitude } = data;
-
     const lngLat = [longitude, latitude];
 
-    if (markers[id]) {
-        markers[id].setLngLat(lngLat);
-    } else {
+    if (!markers[id]) {
         markers[id] = new maplibregl.Marker({ color: "red" })
             .setLngLat(lngLat)
             .addTo(map);
+    } else {
+        markers[id].setLngLat(lngLat);
     }
-
-    map.setCenter(lngLat);
-    map.setZoom(16);
 });
 
 socket.on("user-disconnected", (id) => {
