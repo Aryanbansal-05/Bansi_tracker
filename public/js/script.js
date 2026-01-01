@@ -19,26 +19,32 @@ const map = new maplibregl.Map({
         layers: [{ id: "osm", type: "raster", source: "osm" }],
     },
     center: [0, 0], 
-    zoom: 2,       
+    zoom: 2,
 });
 
 map.addControl(new maplibregl.NavigationControl());
 
 const markers = {};
-
-let lastSent = 0;
+let hasCenteredOnce = false; 
 
 if (navigator.geolocation) {
     navigator.geolocation.watchPosition(
         (position) => {
-            const now = Date.now();
-            if (now - lastSent < 2000) return; 
-            lastSent = now;
-
             const { latitude, longitude } = position.coords;
+            const lngLat = [longitude, latitude];
+
             socket.emit("send-location", { latitude, longitude });
+
+            if (!hasCenteredOnce) {
+                map.flyTo({
+                    center: lngLat,
+                    zoom: 16,
+                    speed: 1.2,
+                });
+                hasCenteredOnce = true;
+            }
         },
-        console.error,
+        (error) => console.error(error),
         { enableHighAccuracy: true }
     );
 }
