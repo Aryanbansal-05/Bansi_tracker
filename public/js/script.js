@@ -13,19 +13,19 @@ const map = new maplibregl.Map({
                     "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
                 ],
                 tileSize: 256,
-                attribution: "© OpenStreetMap contributors",
+                attribution: "Bansi Tracker",
             },
         },
         layers: [{ id: "osm", type: "raster", source: "osm" }],
     },
-    center: [0, 0], 
+    center: [0, 0],
     zoom: 2,
 });
 
 map.addControl(new maplibregl.NavigationControl());
 
 const markers = {};
-let hasCenteredOnce = false; 
+let hasCenteredOnce = false;
 
 if (navigator.geolocation) {
     navigator.geolocation.watchPosition(
@@ -45,7 +45,9 @@ if (navigator.geolocation) {
             }
         },
         (error) => console.error(error),
-        { enableHighAccuracy: true }
+        {
+            enableHighAccuracy: true,
+        }
     );
 }
 
